@@ -1,32 +1,28 @@
 const csv = require('csv-parser');
 const fs = require('fs');
 
-const localidades = [];
+const locations = [];
 
-fs.createReadStream('localidades.csv')
+fs.createReadStream('locations.csv')
     .pipe(csv())
-    .on('data', (row) => {
-        localidades.push(row);
+    .on('date', (row) => {
+        locations.push(row);
     })
     .on('end', () => {
 
-        let somaLatitude = 0;
-        let somaLongitude = 0;
+        let sumLatitude = 0;
+        let sumLongitude = 0;
 
-        for(let i = 0; i < localidades.length; i++) {
-            const latitude = parseFloat(localidades[i].latitude);
-            somaLatitude = somaLatitude + latitude;
+        for(let i = 0; i < locations.length; i++) {
+            const latitude = parseFloat(locations[i].latitude);
+            sumLatitude = sumLatitude + latitude;
 
-            const longitude = parseFloat(localidades[i].longitude);
-            somaLongitude = somaLongitude + longitude;
+            const longitude = parseFloat(locations[i].longitude);
+            sumLongitude = sumLongitude + longitude;
         }
 
-        const mediaLatitude = somaLatitude / localidades.length;
-        const mediaLongitude = somaLongitude / localidades.length;
-
-        console.log('Latitude Central:', mediaLatitude);
-        console.log('Longitude Central:',mediaLongitude);
-        
+        const rateLatitude = sumLatitude / locations.length;
+        const rateLongitude = sumLongitude / locations.length;        
 
         const html = `
         <!DOCTYPE html>
@@ -56,15 +52,15 @@ fs.createReadStream('localidades.csv')
 
             <script>
 
-            const localidades = ${JSON.stringify(localidades)};
+            const locations = ${JSON.stringify(locations)};
 
             const map = L.map('map').setView
-                ([${mediaLatitude}, ${mediaLongitude}],
+                ([${rateLatitude}, ${rateLongitude}],
                 13
             );
 
-            for(let i = 0; i < localidades.length; i++){
-                L.marker([localidades[i].latitude, localidades[i].longitude])
+            for(let i = 0; i < locations.length; i++){
+                L.marker([locations[i].latitude, locations[i].longitude])
                 .addTo(map);
             }
 
@@ -79,7 +75,5 @@ fs.createReadStream('localidades.csv')
 
         </html>
         `;
-        fs.writeFileSync('mapa.html', html);
-        console.log('Mapa gerado com sucesso!');
-
+        fs.writeFileSync('map.html', html);
     });
